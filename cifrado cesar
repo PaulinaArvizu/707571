@@ -1,0 +1,38 @@
+/*
+ ============================================================================
+ Name        : CifradoCesar.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(void) {
+	char abc[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+	int d;
+	char p[15];
+
+	printf("Cadena: ");
+	gets(p);
+
+	printf("Desplazamiento: ");
+	scanf("%d", d);
+
+	for(int i = 0; i < strlen(p); i++) {
+		for(int cont = 0; cont < strlen(abc); cont++) {
+			if(p[i] == abc[cont]) {
+				p[i] += d;
+				break;
+			}
+		}
+	}
+
+	puts(p);
+
+	return EXIT_SUCCESS;
+}
