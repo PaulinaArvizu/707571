@@ -1,0 +1,76 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct{
+	int expediente, carrera, edad;
+	char nombre[50];
+}Alumno;
+
+int main() {
+
+	int op = 0, i = 0, exp;
+	Alumno alumnos[20], *p_al;
+	p_al = &alumnos[0];
+
+	do {
+		puts("\n\tMenu:\n0. Registrar nuevo alumno\n1. Imprimir datos\n2. Eliminar alumno\n3. Buscar alumno\n   -Por expediente\n   -Por edad\n4. Salir");
+		scanf("%d", &op);
+		switch(op) {
+		case 0:
+			puts("\n\tRegistro de alumno\n");
+
+			scanf("%d", &((p_al+i)->expediente));
+			gets((p_al+i)->nombre);
+			scanf("%d", &((p_al+i)->carrera));
+			scanf("%d", &((p_al+i)->edad));
+
+			i++;
+			break;
+		case 1:
+			puts("\n\tImprimir datos\n");
+			for(int cont = 0; cont < 20; cont++) {
+				printf("\nExpediente: %d", (p_al+cont)->expediente);
+				printf("\nNombre: %s", (p_al+cont)->nombre);
+				printf("\nCarrera: %d", (p_al+cont)->carrera);
+				printf("\nEdad: %d\n", (p_al+cont)->edad);
+			}
+			break;
+		case 2:
+			puts("\n\tEliminar alumno\n");
+			puts("Expediente del alumno a eliminar: ");
+			scanf("%d", &exp);
+
+			for(int cont = 0; cont < 20; cont++) {
+				if(exp == ((p_al+cont)->expediente)) {
+					((p_al+cont)->expediente) = NULL;
+					((p_al+cont)->nombre) = NULL;
+					((p_al+cont)->carrera) = NULL;
+					((p_al+cont)->edad) = NULL;
+				}
+			}
+
+			break;
+		case 3:
+			puts("\n\tBuscar alumno\n");
+			puts("Expediente del alumno a buscar: ");
+			scanf("%d", &exp);
+			for(int cont = 0; cont < 20; cont++) {
+				if(exp == ((p_al+cont)->expediente)) {
+					printf("\nExpediente: %d", (p_al+cont)->expediente);
+					printf("\nNombre: %s", (p_al+cont)->nombre);
+					printf("\nCarrera: %d", (p_al+cont)->carrera);
+					printf("\nEdad: %d\n", (p_al+cont)->edad);
+				}
+			}
+			break;
+		case 4:
+			puts("\n\tAdios!");
+			break;
+		default: puts("Opcion no valida");
+		}//fin del switch
+	}while(op!=4);
+
+	return 0;
+}
