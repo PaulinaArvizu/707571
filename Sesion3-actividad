@@ -1,7 +1,5 @@
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct{
 	int expediente, carrera, edad;
@@ -9,6 +7,8 @@ typedef struct{
 }Alumno;
 
 int main() {
+	setbuf(stdin, NULL);
+	setbuf(stdout, NULL);
 
 	int op = 0, i = 0, exp;
 	Alumno alumnos[20], *p_al;
