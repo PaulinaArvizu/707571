@@ -1,0 +1,120 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <String.h>
+
+typedef struct{
+	char nombre[15];
+	float calificacion;
+} Profesor;
+
+void readArray(Profesor array[], int n);
+int mergeArrays(Profesor array1[], int n1, Profesor array2[], int n2, Profesor arrayF[], int nF);
+void sortArray(Profesor array[], int n);
+void printArray(Profesor array[], int n);
+void eliminarElemento(Profesor array[], int n, int posicion);
+
+
+int main(void){
+	setbuf(stdin, NULL);
+	setbuf(stdout, NULL);
+
+	Profesor arr1[20];  //Primer arreglo
+	Profesor arr2[20];  //Segundo arreglo
+	Profesor arrF[40];  //Arreglo final, con elementos fusionados y ordenados
+	int n1, n2; //Longitud de los arreglos
+	puts("Array 1 ");
+	scanf("%d", &n1);
+	readArray(arr1, n1); //leer el primer arreglo
+
+	puts("Array 2 ");
+	scanf("%d", &n2);
+	readArray(arr2, n2); //leer el segundo arreglo
+
+	int nF = n1 + n2; //longitud del arreglo final
+
+	int nFF = mergeArrays(arr1, n1, arr2, n2, arrF, nF);  //Fusionar los dos arreglos en un tercer arreglo
+
+	sortArray(arrF, nFF);  //Ordenar los elementos del tercer arreglo, recuerde que pueden existir profesores repetidos
+
+	printArray(arrF, nFF);   //Imprimir el resultado final
+
+return 0;
+}
+
+void readArray(Profesor array[], int n) {
+	Profesor *a = array;
+	char temp;
+	int i;
+	for(i = 0; i < n; i++) {
+		scanf("%f", &(a+i)->calificacion);
+		scanf("%c",&temp);
+		scanf("%[^\n]", (a+i)->nombre);
+	}
+}
+
+int mergeArrays(Profesor array1[], int n1, Profesor array2[], int n2, Profesor arrayF[], int nF) {
+	Profesor *a1 = array1;
+	Profesor *a2 = array2;
+	Profesor *aF = arrayF;
+	int nFF = nF;
+	float acum, num;
+
+	for(int i = 0; i < n1; i++) { //agrega array1
+		strcpy((aF+i)->nombre, (a1+i)->nombre);
+		((aF+i)->calificacion) = ((a1+i)->calificacion);
+	}
+
+	for(int i = n1; i < nF; i++) { //agrega array2
+		strcpy((aF+i)->nombre, (a2+(i-n1))->nombre);
+		((aF+i)->calificacion) = ((a2+(i-n1))->calificacion);
+	}
+
+	for(int i = 0; i < nF - 1; i++) { //promedia los repetidos
+		acum = ((aF+i)->calificacion);
+		num = 1;
+		for(int cont = i + 1; cont < nF; cont++)
+			if(0 == strcmp((aF+i)->nombre, (aF+cont)->nombre)) {
+				acum += ((aF+cont)->calificacion);
+				num++;
+				eliminarElemento(arrayF, nF, cont);
+				nFF--;
+			}
+		((aF+i)->calificacion) = acum/num;
+	}
+	return nFF;
+}
+
+void sortArray(Profesor array[], int n) {
+	Profesor *a = array;
+	float x;
+	char nom[15];
+
+	for(int i = 0; i < n - 1; i++) {
+		for(int cont = i + 1; cont < n; cont++)
+			if(((a+i)->calificacion) < ((a+cont)->calificacion)) {
+				x = ((a+i)->calificacion);
+				strcpy(nom, ((a+i)->nombre));
+
+				((a+i)->calificacion) = ((a+cont)->calificacion);
+				strcpy((a+i)->nombre, (a+cont)->nombre);
+
+				((a+cont)->calificacion) = x;
+				strcpy((a+cont)->nombre, nom);
+			}
+		}
+}
+
+void printArray(Profesor array[], int n) {
+	Profesor *a = array;
+	for(int i = 0; i < n; i++)
+		printf("%s\t%.1f\n", (a+i)->nombre, (a+i)->calificacion);
+}
+
+void eliminarElemento(Profesor array[], int n, int posicion) {
+	Profesor *a = array;
+	for(int i = posicion; i < n; i++) {
+			strcpy((a+i)->nombre, (a+(i+1))->nombre);
+			((a+i)->calificacion) = ((a+(i+1))->calificacion);
+		}
+	(a+(n-1))->calificacion = -1;
+}
