@@ -1,0 +1,569 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef enum {false, true}boolean;
+
+typedef struct {
+	int d, m, a;
+}Fecha;
+
+typedef struct {
+	int ID;
+	char nombre[20];
+	char apellido_materno[20];
+	char apellido_paterno[20];
+	Fecha* nacimiento;
+}Usuario;
+
+typedef struct {
+	int ID_cuenta, ID_usuario, saldo;
+	Fecha* apertura;
+}Cuenta;
+
+typedef struct {
+	int ID;
+	char tipo[10];
+	int origen;
+	int destino;
+	Fecha* transaccion;
+	int monto;
+
+}Transaccion;
+
+void nuevoCliente(char[]);
+void buscarCliente(char[], int ID);
+void eliminarCliente(char[], int ID);
+void imprimirClientes(char[]);
+boolean verificarUsuario(char[], int ID);
+boolean verificarCuenta(char[], int ID);
+void nuevaCuenta(char[], char[]);
+void buscarCuenta(char[], char[], int ID);
+void eliminarCuenta(char[], int ID);
+void imprimirCuentas(char[], char[]);
+void deposito(char[], char[]);
+void retiro(char[], char[]);
+void transferencia(char[], char[]);
+boolean tieneFondos(char[], int ID, int monto);
+
+int main(void) {
+	setbuf(stdin, NULL);
+	setbuf(stdout, NULL);
+
+	//FILE* archivo = fopen("mydb.txt", "rb");
+	//char direccion[50];
+	char dir_usuarios[] = "usuarios.dat", dir_cuentas[] = "cuentas.dat", dir_transacciones[] = "transaciones.dat";
+/*
+	if(archivo == NULL) {
+		fclose(archivo);
+		archivo = fopen("mydb.txt", "wb");
+		puts("En donde quieres guardar los nuevos archivos?");
+		gets(direccion);
+
+		strcpy(dir_usuarios, direccion);
+		strcat(dir_usuarios, "\\usuarios.dat");
+		strcpy(dir_cuentas, direccion);
+		strcat(dir_cuentas, "\\cuentas.dat");
+		strcpy(dir_transacciones, direccion);
+		strcat(dir_transacciones, "\\transacciones.dat");
+
+		fwrite(direccion, 50, 1, archivo);
+		fwrite(dir_usuarios, 50, 1, archivo);
+		fwrite(dir_cuentas, 50, 1, archivo);
+		fwrite(dir_transacciones, 50, 1, archivo);
+
+		fclose(archivo);
+	}
+	else {
+		fread(dir_usuarios, 50, 1, archivo);
+		fread(dir_cuentas, 50, 1, archivo);
+		fread(dir_transacciones, 50, 1, archivo);
+		fclose(archivo);
+	}
+*/
+	int op = 0, op2, ID;
+
+	do {
+		puts("\n<< Sistema MyDB >>");
+		puts("   1. Clientes");
+		puts("   2. Cuentas");
+		puts("   3. Transacciones");
+		puts("   4. Salir");
+		printf("Seleccione una opcion: ");
+		scanf("%d", &op);
+
+		switch(op) {
+		case 1:
+			puts("\n1. Nuevo cliente");
+			puts("2. Buscar cliente");
+			puts("3. Eliminar cliente");
+			puts("4. Imprimir clientes");
+			printf("Seleccione una opcion: ");
+			scanf("%d", &op2);
+
+			switch(op2) {
+			case 1: //Nuevo Cliente
+				nuevoCliente(dir_usuarios);
+				break;
+			case 2://Buscar Cliente
+				printf("ID del cliente: ");
+				scanf("%d", &ID);
+				buscarCliente(dir_usuarios, ID);
+				break;
+			case 3://Eliminar Cliente
+				printf("ID del cliente: ");
+				scanf("%d", &ID);
+				eliminarCliente(dir_usuarios, ID);
+				break;
+			case 4://Imprimir clientes
+				imprimirClientes(dir_usuarios);
+				break;
+			default: puts("\nOpcion no valida.");
+			}
+
+			break;
+		case 2:
+			puts("\n1. Nueva cuenta");
+			puts("2. Buscar cuenta");
+			puts("3. Eliminar cuenta");
+			puts("4. Imprimir cuenta");
+			printf("Seleccione una opcion: ");
+			scanf("%d", &op2);
+
+			switch(op2) {
+			case 1://Nueva cuenta
+				nuevaCuenta(dir_cuentas, dir_usuarios);
+				break;
+			case 2://Buscar cuenta
+				printf("ID del cliente: ");
+				scanf("%d", &ID);
+				buscarCuenta(dir_usuarios, dir_cuentas, ID);
+				break;
+			case 3://Eliminar cuenta
+				printf("ID del cliente: ");
+				scanf("%d", &ID);
+				eliminarCuenta(dir_cuentas, ID);
+				break;
+			case 4://Imprimir cuenta
+				imprimirCuentas(dir_usuarios, dir_cuentas);
+				break;
+			default: puts("\nOpcion no valida.");
+			}
+
+			break;
+		case 3:
+			puts("\n1. Deposito");
+			puts("2. Retiro");
+			puts("3. Transferencia");
+			printf("Seleccione una opcion: ");
+			scanf("%d", &op2);
+
+			switch(op2) {
+			case 1://Deposito
+				deposito(dir_transacciones, dir_cuentas);
+				break;
+			case 2://Retiro
+				retiro(dir_transacciones, dir_cuentas);
+				break;
+			case 3://Transferencia
+				transferencia(dir_transacciones, dir_cuentas);
+				break;
+			}
+
+			break;
+		case 4: puts("\n\nAdios!");
+			break;
+		default: puts("\nOpcion no valida.");
+		}
+	}while(op != 4);
+
+
+	return EXIT_SUCCESS;
+}
+
+void nuevoCliente(char dir_usuarios[]) {
+	Usuario *u;
+	int id_u = 1;
+
+	while(verificarUsuario(dir_usuarios, id_u))
+		id_u++;
+	u->ID = id_u;
+	printf("Nombre: ");
+	gets(u->nombre);
+	printf("Apellido paterno: ");
+	gets(u->apellido_paterno);
+	printf("Apellido materno: ");
+	gets(u->apellido_materno);
+	printf("Fecha de nacimiento\nDia: ");
+	scanf("%d", &u->nacimiento->d);
+	printf("Mes: ");
+	scanf("%d", &u->nacimiento->m);
+	printf("Año: ");
+	scanf("%d", &u->nacimiento->a);
+
+	FILE* archivo = fopen(dir_usuarios, "ab");
+
+	fwrite(u, sizeof(Usuario), 1, archivo);
+
+	fclose(archivo);
+}
+void buscarCliente(char dir_usuarios[], int ID) {
+	FILE* archivo = fopen(dir_usuarios, "rb");
+	Usuario *u;
+
+	if(verificarUsuario(dir_usuarios, ID)) {
+		while(!feof(archivo)) {
+			fread(u, sizeof(Usuario), 1, archivo);
+			if(u->ID == ID)
+				break;
+		}
+	printf("ID: %d\n%s %s %s\nFecha de nacimiento: %d/%d/%d\n", u->ID,
+			u->nombre, u->apellido_paterno, u->apellido_materno,
+			u->nacimiento->d, u->nacimiento->m, u->nacimiento->a);
+	}
+
+	fclose(archivo);
+}
+void eliminarCliente(char dir_usuarios[], int ID) {//////////////-----------------------
+	FILE* archivo = fopen(dir_usuarios, "rb");
+	Usuario *u;
+	int index;
+
+	while(!feof(archivo)) {// busca el indice del usuario
+		fread(u, sizeof(Usuario), 1, archivo);
+		if(u->ID == ID) {
+			index = ftell(archivo);
+			break;
+		}
+	}
+
+	u->ID = 0;
+	fclose(archivo);
+	archivo = fopen(dir_usuarios, "wb"); //sobreescribe en el usuario
+	fseek(archivo, index - sizeof(Usuario), SEEK_SET);//se va al usuario que se desea borrar
+	fwrite(u, sizeof(Usuario), 1, archivo);
+	fclose(archivo);
+}
+void imprimirClientes(char dir_usuarios[]) {
+	FILE* archivo = fopen(dir_usuarios, "rb");
+	Usuario *u;
+
+	if(archivo != NULL) {
+		while(!feof(archivo)) {
+			fread(u, sizeof(Usuario), 1, archivo);
+			if(u->ID != 0)
+				printf("ID: %d\n%s %s %s\nFecha de nacimiento: %d/%d/%d\n\n", u->ID,
+					u->nombre, u->apellido_paterno, u->apellido_materno,
+					u->nacimiento->d, u->nacimiento->m, u->nacimiento->a);
+		}
+	}
+
+	fclose(archivo);
+}
+boolean verificarUsuario(char dir_usuarios[], int ID) {
+	FILE* archivo = fopen(dir_usuarios, "rb");
+	Usuario *u;
+
+	if(archivo != NULL) {
+		while(!feof(archivo)) {
+			fread(u, sizeof(Usuario), 1, archivo);
+			if(u->ID == ID) {
+				fclose(archivo);
+				return true;
+			}
+		}
+	}
+
+	fclose(archivo);
+	return false;
+}
+boolean verificarCuenta(char dir_cuentas[], int ID) {
+	FILE* archivo = fopen(dir_cuentas, "rb");
+	Cuenta *c;
+
+	if(archivo != NULL) {
+		while(!feof(archivo)) {
+			fread(c, sizeof(Cuenta), 1, archivo);
+			if(c->ID_cuenta == ID) {
+				fclose(archivo);
+				return true;
+			}
+		}
+	}
+
+	fclose(archivo);
+	return false;
+}
+void nuevaCuenta(char dir_cuentas[], char dir_usuarios[]) {
+	FILE* archivo = fopen(dir_cuentas, "ab");
+	Cuenta *c;
+	int id_c = 1;
+	scanf("%d", &c->ID_usuario);
+	if(verificarUsuario(dir_usuarios, c->ID_usuario)) {
+		while(verificarCuenta(dir_cuentas, id_c))
+			id_c++;
+		c->ID_cuenta = id_c;
+		printf("Saldo inicial: ");
+		scanf("%d", &c->saldo);
+		printf("Fecha de apertura\nDia: ");
+		scanf("%d", &c->apertura->d);
+		printf("Mes: ");
+		scanf("%d", &c->apertura->m);
+		printf("Año: ");
+		scanf("%d", &c->apertura->a);
+
+		fwrite(c, sizeof(Cuenta), 1, archivo);
+
+	}
+	fclose(archivo);
+}
+void buscarCuenta(char dir_usuarios[], char dir_cuentas[], int ID) {
+	FILE* cuenta = fopen(dir_cuentas, "rb");
+	Cuenta *c;
+	FILE* usuario = fopen(dir_usuarios, "rb");
+	Usuario *u;
+
+	if(usuario != NULL && cuenta != NULL) {
+		while(!feof(cuenta)) {//busca cuenta
+			fread(c, sizeof(Cuenta), 1, cuenta);
+			if(c->ID_cuenta == ID)
+				break;
+		}
+
+		while(!feof(usuario)) {//busca usuario
+			fread(u, sizeof(Usuario), 1, usuario);
+			if(c->ID_usuario == u->ID)
+				break;
+			}
+		printf("ID: %d\n%s %s %s\nSaldo: %d\n", c->ID_cuenta,
+			u->nombre, u->apellido_paterno, u->apellido_materno,
+			c->saldo);
+	}
+
+	fclose(cuenta);
+	fclose(usuario);
+}
+void eliminarCuenta(char dir_cuentas[], int ID) {//////////////-----------------------
+	FILE* archivo = fopen(dir_cuentas, "rb");
+	Cuenta *c;
+	int index;
+
+	while(!feof(archivo)) {// busca el indice de la cuenta
+		fread(c, sizeof(Usuario), 1, archivo);
+		if(c->ID_cuenta == ID) {
+			index = ftell(archivo);
+			break;
+		}
+	}
+
+	c->ID_cuenta = 0;
+	fclose(archivo);
+	archivo = fopen(dir_cuentas, "wb"); //sobreescribe en la cuenta
+	fseek(archivo, index - sizeof(Cuenta), SEEK_SET);//se va la cuenta que se desea borrar
+	fwrite(c, sizeof(Cuenta), 1, archivo);
+	fclose(archivo);
+}
+void imprimirCuentas(char dir_usuarios[], char dir_cuentas[]) {
+	FILE* cuenta = fopen(dir_cuentas, "rb");
+	FILE* usuario = fopen(dir_usuarios, "rb");
+	Cuenta *c;
+	Usuario *u;
+
+	if(cuenta != NULL && usuario != NULL) {
+		while(!feof(cuenta)) {
+			fread(c, sizeof(Cuenta), 1, cuenta);
+			rewind(usuario);
+			while(!feof(usuario)) {//busca usuario
+				fread(u, sizeof(Usuario), 1, usuario);
+				if(c->ID_usuario == u->ID && c->ID_cuenta != 0 && u->ID != 0) {
+					printf("ID: %d\n%s %s %s\nSaldo: %d\n\n", c->ID_cuenta,
+						u->nombre, u->apellido_paterno, u->apellido_materno,
+						c->saldo);
+					break;
+				}
+			}
+		}
+	}
+	fclose(cuenta);
+	fclose(usuario);
+}
+void deposito(char dir_transacciones[], char dir_cuentas[]) {
+	Transaccion *t;
+	Cuenta *c;
+	int ID, index;
+	FILE* archivo = fopen(dir_transacciones, "rb");
+
+	printf("ID de la cuenta: ");
+	scanf("%d", &ID);
+	if(verificarCuenta(dir_cuentas, ID)) {
+		if(fseek(archivo, -sizeof(Transaccion), SEEK_END) == 1)//se va a la ultima transaccion registrada
+			t->ID = 1; //si no hay transacciones registradas previamente
+		else {
+			fread(t, sizeof(Transaccion), 1, archivo);
+			t->ID++; //asigna el id siguiente
+		}
+
+		fclose(archivo);
+
+		strcpy(t->tipo, "Deposito");
+		t->origen = 0;
+		t->destino = ID;
+		printf("Monto a depositar: ");
+		scanf("%d", &t->monto);
+		printf("Fecha de transaccion\nDia: ");
+		scanf("%d", &t->transaccion->d);
+		printf("Mes: ");
+		scanf("%d", &t->transaccion->m);
+		printf("Año: ");
+		scanf("%d", &t->transaccion->a);
+
+		archivo = fopen(dir_transacciones, "ab");
+		fwrite(t, sizeof(Transaccion), 1, archivo);
+		fclose(archivo);
+
+		//se le suma el monto a la cuenta
+		archivo = fopen(dir_cuentas, "rb"); //para buscar el indice de la cuenta
+		while(!feof(archivo)) {
+			fread(c, sizeof(Usuario), 1, archivo);
+			if(c->ID_cuenta == t->origen) {
+				index = ftell(archivo);
+				break;
+			}
+		}
+
+		c->saldo += t->monto;
+		fclose(archivo);
+		archivo = fopen(dir_cuentas, "wb"); //para sobreescribir en la cuenta deseada
+		fseek(archivo, index - sizeof(Cuenta), SEEK_SET);//se va a la cuenta a modificar
+		fwrite(c, sizeof(Cuenta), 1, archivo);
+		fclose(archivo);
+	}
+}
+void retiro(char dir_transacciones[], char dir_cuentas[]) {//////////////-----------------------
+	Transaccion *t;
+	Cuenta *c;
+	int ID, index;
+	FILE* archivo = fopen(dir_transacciones, "rb");
+
+	printf("ID de la cuenta: ");
+	scanf("%d", &ID);
+	if(verificarCuenta(dir_cuentas, ID)) {
+		if(fseek(archivo, -sizeof(Transaccion), SEEK_END) == 1)//se va a la ultima transaccion registrada
+			t->ID = 1; //si no hay transacciones registradas previamente
+		else {
+			fread(t, sizeof(Transaccion), 1, archivo);
+			t->ID++; //asigna el id siguiente
+		}
+
+		fclose(archivo);
+
+		strcpy(t->tipo, "Retiro");
+		t->origen = ID;
+		t->destino = 0;
+		printf("Monto a retirar: ");
+		scanf("%d", &t->monto);
+		printf("Fecha de transaccion\nDia: ");
+		scanf("%d", &t->transaccion->d);
+		printf("Mes: ");
+		scanf("%d", &t->transaccion->m);
+		printf("Año: ");
+		scanf("%d", &t->transaccion->a);
+
+		if(tieneFondos(dir_cuentas, t->origen, t->monto)) {
+			//se registra la transaccion
+			archivo = fopen(dir_transacciones, "ab");
+			fwrite(t, sizeof(Transaccion), 1, archivo);
+			fclose(archivo);
+
+
+			//se le resta el monto a la cuenta
+			archivo = fopen(dir_cuentas, "rb"); //para buscar el indice de la cuenta
+			while(!feof(archivo)) {
+				fread(c, sizeof(Usuario), 1, archivo);
+				if(c->ID_cuenta == t->origen) {
+					index = ftell(archivo);
+					break;
+				}
+			}
+
+			c->saldo -= t->monto;
+			fclose(archivo);
+			archivo = fopen(dir_cuentas, "wb"); //para sobreescribir en la cuenta deseada
+			fseek(archivo, index - sizeof(Cuenta), SEEK_SET);//se va a la cuenta a modificar
+			fwrite(c, sizeof(Cuenta), 1, archivo);
+			fclose(archivo);
+		}
+	}
+}
+void transferencia(char dir_transacciones[], char dir_cuentas[]) {
+	Transaccion *t, *temp;
+	Cuenta *c;
+	int index;
+	FILE* archivo = fopen(dir_transacciones, "rb");
+
+	printf("ID del cliente: ");
+	scanf("%d", &t->origen);
+	if(verificarCuenta(dir_cuentas, t->origen)) {
+		printf("ID a depositar: ");
+		scanf("%d", &t->destino);
+		if(verificarCuenta(dir_cuentas, t->destino)) {
+			printf("Monto: ");
+			scanf("%d", &t->monto);
+			if(tieneFondos(dir_cuentas, t->origen, t->monto)) {
+				if(fseek(archivo, -sizeof(Transaccion), SEEK_END) == 1)//se va a la ultima transaccion registrada
+					t->ID = 1; //si no hay transacciones registradas previamente
+				else {
+					fread(temp, sizeof(Transaccion), 1, archivo);
+					t->ID = temp->ID + 1; //asigna el id siguiente
+				}
+
+				fclose(archivo);
+
+				printf("Fecha de transaccion\nDia: ");
+				scanf("%d", &t->transaccion->d);
+				printf("Mes: ");
+				scanf("%d", &t->transaccion->m);
+				printf("Año: ");
+				scanf("%d", &t->transaccion->a);
+				strcpy(t->tipo, "Transferencia");
+				archivo = fopen(dir_transacciones, "ab");
+				fwrite(t, sizeof(Transaccion), 1, archivo);
+				fclose(archivo);
+
+				//se le resta el monto a la cuenta (mismo procedimiento que cuando se hace un retiro)
+				archivo = fopen(dir_cuentas, "rb"); //para buscar el indice de la cuenta
+				while(!feof(archivo)) {
+					fread(c, sizeof(Usuario), 1, archivo);
+					if(c->ID_cuenta == t->origen) {
+						index = ftell(archivo);
+						break;
+					}
+				}
+
+				c->saldo -= t->monto;
+				fclose(archivo);
+				archivo = fopen(dir_cuentas, "wb"); //para sobreescribir en la cuenta deseada
+				fseek(archivo, index - sizeof(Cuenta), SEEK_SET);//se va a la cuenta a modificar
+				fwrite(c, sizeof(Cuenta), 1, archivo);
+				fclose(archivo);
+
+			}
+		}
+	}
+}
+boolean tieneFondos(char dir_cuentas[], int ID, int monto) {
+	FILE *archivo = fopen(dir_cuentas, "rb");
+	Cuenta *c;
+
+	if(verificarCuenta(dir_cuentas, ID)) {
+		while(!feof(archivo)) {//busca cuenta
+			fread(c, sizeof(Cuenta), 1, archivo);
+			if(c->ID_cuenta == ID)
+				break;
+		}
+		if(c->saldo >= monto)
+			return true;
+	}
+
+	return false;
+}
