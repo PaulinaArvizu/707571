@@ -1,0 +1,42 @@
+/*
+ ============================================================================
+ Name        : Sesion22-Mapas.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+unsigned long horner(char *C, int x, int longitud);
+int valueOf(char c);
+
+int main(void) {
+	char C[] = {'J', 'P', 'J'};
+
+	int x = 26; // x es la base (26 para el alfabeto & 10 para numeros)
+	int longitud = 3; // longitud del arreglo
+
+	printf("El indice es %ld", horner(C, x, longitud));
+	return EXIT_SUCCESS;
+}
+
+unsigned long horner(char *C, int x, int longitud) {
+	long h = valueOf(C[0]);
+
+	printf("h0 = %ld\n", h);
+
+	for(int i = 1; i < longitud; i++) {
+		printf("h%d = (%ld * %d) + ValueOf(%c): %d\n", i, h, x, C[i], valueOf(C[i]));
+		h = (h * x) + valueOf(C[i]);
+		printf("%ld\n", h);
+	}
+	return h;
+}
+
+int valueOf(char c) {
+	return c - 65;
+}
