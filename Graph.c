@@ -40,6 +40,12 @@ void graph_destroy(Graph g) {
 	free(g);
 }
 
+Type clone(Type data) {
+	Type new = (Type)malloc(sizeof(Type));
+	new = data;
+	return new;
+}
+
 Node *newNode(Type data, int id) {
 	Node *new = (Node*)malloc(sizeof(Node));
 	new->id = id;
@@ -50,8 +56,8 @@ Node *newNode(Type data, int id) {
 }
 
 boolean vertex_exists(Graph g, Type data) {
-	boolean exists;
-		for(int i = 0; i< sizeof(g->array); i++) {
+	boolean exists = false;
+		for(int i = 0; i< g->orden; i++) {
 			exists = g->cmp(g->array[i]->data, data);
 			if(exists)
 				return exists;
@@ -63,19 +69,21 @@ boolean graph_addVertex(Graph g, Type data) {
 	boolean exists = vertex_exists(g, data);
 	if(exists)
 		return false;
-	g->array[g->orden] = newNode(data, g->orden);
+	g->array = (Node**)realloc(g->array, sizeof(Node)*(g->orden + 1));
+	g->array[g->orden] = newNode(clone(data), g->orden);
 	g->orden++;
-	g->array = (Node**)realloc(g->array, sizeof(g->array) + sizeof(Node*));
+	//g->array = (Node**)realloc(g->array, sizeof(Node)*(g->orden + 1));
+
 	return true;
 }
 
 boolean graph_addEdge(Graph g, Type source, Type sink) {
-	int i, j = 0;
+	int i = 0, j = 0;
 	if(!vertex_exists(g, source) || !vertex_exists(g, sink))
 		return false;
 	while(g->array[i]->data != source)
 		i++;//encuentra el source
-    for(j = 0; j<size(g->array[i]->vertexList); j++)
+    for(j = 0; j < size(g->array[i]->vertexList); j++)
         if(get(g->array[i]->vertexList, j) == sink)
             return false;
     add(g->array[i]->vertexList, sink); //Se usa el id como indicador de posicion en las funciones de busqueda de la lista para despues agregar la arista en caso de no encontrarla.
@@ -100,11 +108,10 @@ unsigned long graph_outDegree(Graph g, Type source) {
 
 boolean graph_hasEdge(Graph g, Type source, Type sink) {
     int i = 0;
-    int j;
+
     while(g->array[i]->data != source)
         i++;
-    for(j=0; j<size(g->array[i]->vertexList); j++)
-    {
+    for(int j = 0; j < size(g->array[i]->vertexList); j++) {
         if(get(g->array[i]->vertexList, j) == sink )
             return true;
     }
