@@ -52,14 +52,16 @@ int main(void) {
 
 	Graph g1 = graph_create(cmpTwot);
 
-	if(archivo != NULL)
+	if(archivo != NULL){
 		while(!feof(archivo)) {
+			char *te, *te2;
 			fread(c, sizeof(char), 18, archivo);
 			c[18] = '\0';
-			printf("%s\n", c);
 
-			t->twot = c;
+			te = strdup(c);
+			t->twot = te;
 			t->retwot = false;
+
 			graph_addVertex(g1, t);
 
 			fread(temp, sizeof(char), 1, archivo);
@@ -68,11 +70,15 @@ int main(void) {
 			fread(temp, sizeof(char), 1, archivo);
 
 			c[18] = '\0';
-			rt->twot = c;
+			te2 = strdup(c);
+			rt->twot = te2;
 			rt->retwot = true;
+
 			graph_addVertex(g1, rt);
 			graph_addEdge(g1, t, rt);
+
 		}
+	}
 
 	graph_print(g1, printTwot);
 
